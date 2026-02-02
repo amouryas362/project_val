@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will you be my Valentine?</title>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Pacifico&family=Sacramento&family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        valentine: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        handwriting: ['Sacramento', 'cursive'],
+                        title: ['Pacifico', 'cursive'],
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .btn-yes {
+                @apply bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95 text-xl;
+            }
+            .btn-no {
+                @apply bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-100 ease-in-out absolute text-xl;
+            }
+            .glass-container {
+                @apply bg-white/30 backdrop-blur-md border border-white/20 shadow-xl rounded-3xl p-8;
+            }
+        }
+        
+        body {
+            background-image: url("https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen overflow-hidden flex items-center justify-center">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const phrases = [
+            "No",
+            "Are you sure?",
+            "Really sure?",
+            "Think again!",
+            "Last chance!",
+            "Surely not?",
+            "You might regret this!",
+            "Give it another thought!",
+            "Are you absolutely certain?",
+            "This could be a mistake!",
+            "Have a heart!",
+            "Don't be so cold!",
+            "Change of heart?",
+            "Wouldn't you reconsider?",
+            "Is that your final answer?",
+            "You're breaking my heart ;(",
+        ];
+
+        function App() {
+            const [noCount, setNoCount] = useState(0);
+            const [yesPressed, setYesPressed] = useState(false);
+            const yesButtonSize = noCount * 20 + 16;
+
+            // "No" button position state
+            const [noBtnPosition, setNoBtnPosition] = useState({ top: 'auto', left: 'auto', position: 'relative' });
+
+            // Text for "No" button
+            const getNoButtonText = () => {
+                return phrases[Math.min(noCount, phrases.length - 1)];
+            };
+
+            // Trigger confetti
+            const handleYesClick = () => {
+                setYesPressed(true);
+
+                var duration = 3 * 1000;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+                var random = (min, max) => Math.random() * (max - min) + min;
+
+                var interval = setInterval(function () {
+                    var timeLeft = animationEnd - Date.now();
+
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+            };
+
+            const handleNoHover = (e) => {
+                setNoCount(noCount + 1);
+
+                // Get viewport dimensions
+                const x = Math.random() * (window.innerWidth - 200); // Subtract button width/padding
+                const y = Math.random() * (window.innerHeight - 100); // Subtract button height/padding
+
+                setNoBtnPosition({
+                    position: 'fixed', // Switch to fixed to move freely relative to viewport
+                    left: `${x}px`,
+                    top: `${y}px`,
+                });
+            };
+
+            return (
+                <div className="flex flex-col items-center justify-center h-full w-full">
+                    {yesPressed ? (
+                        <div className="glass-container flex flex-col items-center animate-float">
+                            <img
+                                src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-kisses.gif"
+                                alt="Bear Kiss"
+                                className="h-64 rounded-lg shadow-md mb-6"
+                            />
+                            <h1 className="text-4xl md:text-6xl font-title text-valentine-600 font-bold text-center drop-shadow-sm">
+                                Yay! I love you! <br /> Happy Valentine's Day! 💖
+                            </h1>
+                        </div>
+                    ) : (
+                        <div className="glass-container flex flex-col items-center justify-center text-center max-w-2xl mx-4">
+                            <img
+                                className="h-64 rounded-lg shadow-md mb-8 hover:scale-105 transition-transform duration-300"
+                                src="https://gifdb.com/images/high/cute-love-bear-roses-ou7zho5oosxnpo6k.gif"
+                                alt="Cute Bear with Roses"
+                            />
+
+                            <h1 className="text-4xl md:text-6xl font-title text-valentine-600 font-bold mb-8 drop-shadow-sm">
+                                Will you be my Valentine?
+                            </h1>
+
+                            <div className="flex flex-wrap justify-center items-center gap-4 w-full relative h-32">
+                                <button
+                                    className="btn-yes z-50"
+                                    style={{ fontSize: yesButtonSize + "px" }} // Grow button
+                                    onClick={handleYesClick}
+                                >
+                                    Yes
+                                </button>
+
+                                <button
+                                    className="btn-no z-40"
+                                    style={noBtnPosition}
+                                    onMouseEnter={handleNoHover}
+                                    onClick={handleNoHover} // For mobile touch
+                                >
+                                    {noCount === 0 ? "No" : getNoButtonText()}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <footer className="fixed bottom-4 text-white/80 font-sans text-sm drop-shadow-md">
+                        Made with ❤️ by Antigravity
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
