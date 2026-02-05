@@ -40,7 +40,7 @@
                             400: '#fb7185',
                             500: '#f43f5e',
                             600: '#e11d48',
-                        }
+                            43:                         }
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -166,22 +166,47 @@
             const handleNoHover = () => {
                 setNoCount(noCount + 1);
 
-                // Get viewport dimensions
-                const btnWidth = 100; // estimated width
-                const btnHeight = 50; // estimated height
+                // Safe dimensions
+                const btnWidth = 260; // Increased width buffer
+                const btnHeight = 100;
 
-                const maxWidth = window.innerWidth - btnWidth - 20;
-                const maxHeight = window.innerHeight - btnHeight - 20;
+                // Boundaries for "Safe Mode" (strictly on screen)
+                const maxWidth = window.innerWidth - btnWidth;
+                const maxHeight = window.innerHeight - btnHeight;
 
-                // Smart random position to avoid cursor/touch area if possible
                 let randomX, randomY;
-                let attempts = 0;
 
-                do {
-                    randomX = Math.max(10, Math.random() * maxWidth);
-                    randomY = Math.max(10, Math.random() * maxHeight);
-                    attempts++;
-                } while (attempts < 1); // Expand loop if tracking mouse pos
+                if (noCount < 5) {
+                    // Safe Mode: Stay on screen
+                    const safeX = Math.max(0, maxWidth);
+                    const safeY = Math.max(0, maxHeight);
+
+                    randomX = Math.random() * safeX;
+                    randomY = Math.random() * safeY;
+                } else {
+                    // Phase 2: Escape Logic
+                    // Pick a side to fly off to: 0=Left, 1=Right, 2=Top, 3=Bottom
+                    const exitDirection = Math.floor(Math.random() * 4);
+
+                    switch (exitDirection) {
+                        case 0: // Left
+                            randomX = -300;
+                            randomY = Math.random() * window.innerHeight;
+                            break;
+                        case 1: // Right
+                            randomX = window.innerWidth + 100;
+                            randomY = Math.random() * window.innerHeight;
+                            break;
+                        case 2: // Top
+                            randomX = Math.random() * window.innerWidth;
+                            randomY = -200;
+                            break;
+                        case 3: // Bottom
+                            randomX = Math.random() * window.innerWidth;
+                            randomY = window.innerHeight + 100;
+                            break;
+                    }
+                }
 
                 setNoBtnPosition({
                     position: 'fixed',
